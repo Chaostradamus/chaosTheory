@@ -1,21 +1,32 @@
 import { useState, useRef, useEffect } from 'react'
 
-export const useTimer = (initialTime = 60, onTimeUp) => {
+export const useTimer = (initialTime = 60, onTick, onComplete) => {
   const [timeLeft, setTimeLeft] = useState(initialTime)
   const timerRef = useRef(null)
+  const onCompleteRef = useRef(onComplete)
+  const onTickRef = useRef(onTick)
+
+  // Keep refs updated
+  useEffect(() => {
+    onCompleteRef.current = onComplete
+    onTickRef.current = onTick
+  }, [onComplete, onTick])
 
   const startTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current)
     
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev <= 1) {
+        const newTime = prev - 1
+        if (onTickRef.current) onTickRef.current(newTime)
+        
+        if (newTime <= 0) {
           clearInterval(timerRef.current)
           timerRef.current = null
-          if (onTimeUp) onTimeUp()
+          if (onCompleteRef.current) onCompleteRef.current()
           return 0
         }
-        return prev - 1
+        return newTime
       })
     }, 1000)
   }

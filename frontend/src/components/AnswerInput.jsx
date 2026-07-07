@@ -11,7 +11,7 @@ const AnswerInput = ({ userAnswer, setUserAnswer, isGameActive, operation, onChe
       step={operation === '÷' ? 'any' : '1'}
       value={userAnswer}
       onChange={(e) => setUserAnswer(e.target.value)}
-      placeholder="Type your answer here"
+      placeholder="Type your answer here..."
       disabled={!isGameActive}
       style={{ 
         fontSize: '20px', 
@@ -20,12 +20,13 @@ const AnswerInput = ({ userAnswer, setUserAnswer, isGameActive, operation, onChe
         textAlign: 'center',
         borderRadius: '50px',
         border: isGameActive ? '2px solid #2196F3' : '2px solid #ccc',
-        backgroundColor: 'white',
+        backgroundColor: isGameActive ? 'white' : '#f0f0f0',
         color: '#333',
         outline: 'none',
         transition: 'all 0.2s ease',
         fontFamily: 'monospace',
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        cursor: isGameActive ? 'text' : 'not-allowed'
       }}
       onKeyDown={handleKeyDown}
       onFocus={(e) => {
