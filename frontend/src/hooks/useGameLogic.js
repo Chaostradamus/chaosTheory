@@ -2,42 +2,22 @@ import { useState, useMemo } from 'react'
 import { generateAdditionProblem, generateBasicProblem, calculateAnswer, getProblemString } from '../utils/problemGenerator'
 
 export const useGameLogic = (operation, difficulty) => {
-  // Generate initial problem based on operation and difficulty
-  const getInitialAddends = () => {
-    if (operation === '+') {
-      return generateAdditionProblem(difficulty)
-    } else {
-      return generateBasicProblem(operation)
-    }
-  }
-
-  const [addends, setAddends] = useState(getInitialAddends)
   const [score, setScore] = useState(0)
   const [isGameActive, setIsGameActive] = useState(false)
   const [showGetReady, setShowGetReady] = useState(true)
+  const [problemIndex, setProblemIndex] = useState(0)
 
-  // Generate a new problem (called from event handlers only)
-  const generateNewProblem = () => {
-    let newAddends
+  // Derive addends directly on render frame without triggering effect cascading re-renders
+  const addends = useMemo(() => {
     if (operation === '+') {
-      newAddends = generateAdditionProblem(difficulty)
+      return generateAdditionProblem(difficulty)
     } else {
-      newAddends = generateBasicProblem(operation)
+      return generateBasicProblem(operation, difficulty)
     }
-    setAddends(newAddends)
-  }
+  }, [operation, difficulty, problemIndex])
 
-  // Update settings when operation or difficulty changes (called from App.jsx event handlers)
-  const updateSettings = (newOperation, newDifficulty) => {
-    if (!isGameActive) {
-      let newAddends
-      if (newOperation === '+') {
-        newAddends = generateAdditionProblem(newDifficulty)
-      } else {
-        newAddends = generateBasicProblem(newOperation)
-      }
-      setAddends(newAddends)
-    }
+  const generateNewProblem = () => {
+    setProblemIndex(prev => prev + 1)
   }
 
   const correctAnswer = useMemo(() => {
@@ -82,7 +62,6 @@ export const useGameLogic = (operation, difficulty) => {
     endGame,
     resetGame,
     incrementScore,
-    generateNewProblem,
-    updateSettings
+    generateNewProblem
   }
 }

@@ -12,6 +12,13 @@ import { useGameLogic } from './hooks/useGameLogic'
 import { useTimer } from './hooks/useTimer'
 import { getAuthToken, saveScore, saveGuestScore, removeAuthToken } from './services/api'
 
+const TIMER_OPTIONS = [
+  { label: '30 Seconds', value: 30 },
+  { label: '1 Minute', value: 60 },
+  { label: '1.5 Minutes', value: 90 },
+  { label: '2 Minutes', value: 120 },
+]
+
 function App() {
   // Auth state
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
@@ -22,6 +29,7 @@ function App() {
   // Game state
   const [operation, setOperation] = useState('+')
   const [difficulty, setDifficulty] = useState(1)
+  const [gameDuration, setGameDuration] = useState(60)
   const [userAnswer, setUserAnswer] = useState('')
   const [feedback, setFeedback] = useState('')
   const [showSavePrompt, setShowSavePrompt] = useState(false)
@@ -69,7 +77,7 @@ function App() {
 
   // --- Timer ---
   const { timeLeft, startTimer, stopTimer, resetTimer, setTimeLeft } = useTimer(
-    60,
+    gameDuration,
     null,
     handleTimerComplete
   )
@@ -125,9 +133,16 @@ function App() {
     setDifficulty(newDifficulty)
   }
 
+  const handleDurationChange = (e) => {
+    if (isGameActive) return
+    const newDuration = Number(e.target.value)
+    setGameDuration(newDuration)
+    setTimeLeft(newDuration)
+  }
+
   const startGame = () => {
     if (isGameActive) return
-    setTimeLeft(60)
+    setTimeLeft(gameDuration)
     setIsGameActive(true)
     setFeedback('')
     setUserAnswer('')
@@ -137,7 +152,7 @@ function App() {
 
   const resetGame = () => {
     setIsGameActive(false)
-    setTimeLeft(60)
+    setTimeLeft(gameDuration)
     setFeedback('')
     setUserAnswer('')
     setShowSavePrompt(false)
@@ -234,6 +249,26 @@ function App() {
                 onDifficultyChange={handleDifficultyChange}
                 isDisabled={isGameActive}
               />
+              
+              {/* Duration Selector */}
+              <div style={{ margin: '15px 0' }}>
+                <label htmlFor="duration-select" style={{ marginRight: '10px', fontWeight: 'bold' }}>
+                  ⏱️ Game Duration:
+                </label>
+                <select
+                  id="duration-select"
+                  value={gameDuration}
+                  onChange={handleDurationChange}
+                  disabled={isGameActive}
+                  style={{ padding: '6px 12px', fontSize: '16px', borderRadius: '6px' }}
+                >
+                  {TIMER_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </>
           )}
           
