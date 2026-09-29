@@ -39,20 +39,25 @@ export const login = (username, password) => {
 };
 
 // Score endpoints
-export const saveScore = (operation, difficulty, score, token) => {
-  return apiRequest('/scores/save', 'POST', { operation, difficulty, score }, token);
+export const saveScore = (operation, difficulty, score, duration = 60, token) => {
+  return apiRequest('/scores/save', 'POST', { operation, difficulty, score, duration }, token);
 };
 
-export const saveGuestScore = (operation, difficulty, score, guestName) => {
-  return apiRequest('/scores/guest-save', 'POST', { operation, difficulty, score, guestName });
+export const saveGuestScore = (operation, difficulty, score, duration = 60, guestName) => {
+  return apiRequest('/scores/guest-save', 'POST', { operation, difficulty, score, duration, guestName });
 };
 
-export const getLeaderboard = (operation, difficulty) => {
-  return apiRequest(`/scores/leaderboard/${operation}/${difficulty}`);
+export const getLeaderboard = (operation, difficulty, duration = 60) => {
+  return apiRequest(`/scores/leaderboard/${operation}/${difficulty}?duration=${duration}`);
 };
 
 export const getUserScores = (token) => {
   return apiRequest('/scores/user-scores', 'GET', null, token);
+};
+
+// NEW: Fetch player profile statistics and operation breakdowns
+export const getUserStats = (token) => {
+  return apiRequest('/scores/user-stats', 'GET', null, token);
 };
 
 // Store token in localStorage
@@ -61,7 +66,7 @@ export const setAuthToken = (token) => {
 };
 
 export const getAuthToken = () => {
-  return localStorage.getItem('token');
+  localStorage.getItem('token');
 };
 
 export const removeAuthToken = () => {

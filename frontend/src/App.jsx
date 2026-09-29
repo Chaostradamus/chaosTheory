@@ -51,12 +51,14 @@ function App() {
 
   const checkAndSaveScore = async (finalScore) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/scores/leaderboard/${operation}/${difficulty}`)
+      const response = await fetch(
+        `http://localhost:5000/api/scores/leaderboard/${operation}/${difficulty}?duration=${gameDuration}`
+      )
       const leaderboard = await response.json()
       
       if (leaderboard.length < 10 || finalScore > (leaderboard[leaderboard.length - 1]?.score || 0)) {
         if (token) {
-          await saveScore(operation, difficulty, finalScore, token)
+          await saveScore(operation, difficulty, finalScore, gameDuration, token)
           setFeedback(`✅ Score saved! You're in the top 10!`)
         } else {
           setShowSavePrompt(true)
@@ -102,7 +104,7 @@ function App() {
       return
     }
     try {
-      await saveGuestScore(operation, difficulty, score, guestName.trim())
+      await saveGuestScore(operation, difficulty, score, gameDuration, guestName.trim())
       setShowSavePrompt(false)
       setGuestName('')
       setFeedback(`✅ Score saved as "${guestName.trim()}"! You're in the top 10!`)
@@ -300,7 +302,7 @@ function App() {
         </div>
 
         <div style={{ width: '280px', flexShrink: 0 }}>
-          <Leaderboard operation={operation} difficulty={difficulty} />
+          <Leaderboard operation={operation} difficulty={difficulty} duration={gameDuration} />
         </div>
       </div>
 
