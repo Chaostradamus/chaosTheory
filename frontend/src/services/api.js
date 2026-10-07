@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://chaostheory-hsqn.onrender.com/api';
 
 // Helper for fetch requests
 const apiRequest = async (endpoint, method = 'GET', body = null, token = null) => {
