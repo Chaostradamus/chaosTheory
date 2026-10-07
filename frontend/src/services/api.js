@@ -66,7 +66,7 @@ export const setAuthToken = (token) => {
 };
 
 export const getAuthToken = () => {
-  localStorage.getItem('token');
+  return localStorage.getItem('token'); // Added missing return statement
 };
 
 export const removeAuthToken = () => {

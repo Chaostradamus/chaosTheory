@@ -10,7 +10,7 @@ import AuthModal from './components/AuthModal'
 import Leaderboard from './components/Leaderboard'
 import { useGameLogic } from './hooks/useGameLogic'
 import { useTimer } from './hooks/useTimer'
-import { getAuthToken, saveScore, saveGuestScore, removeAuthToken } from './services/api'
+import { getAuthToken, saveScore, saveGuestScore, removeAuthToken, getLeaderboard } from './services/api'
 
 const TIMER_OPTIONS = [
   { label: '30 Seconds', value: 30 },
@@ -51,10 +51,8 @@ function App() {
 
   const checkAndSaveScore = async (finalScore) => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/scores/leaderboard/${operation}/${difficulty}?duration=${gameDuration}`
-      )
-      const leaderboard = await response.json()
+      // Replaced hardcoded fetch with API service method
+      const leaderboard = await getLeaderboard(operation, difficulty, gameDuration)
       
       if (leaderboard.length < 10 || finalScore > (leaderboard[leaderboard.length - 1]?.score || 0)) {
         if (token) {

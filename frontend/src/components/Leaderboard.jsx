@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getLeaderboard } from '../services/api';
 
-const Leaderboard = ({ operation, difficulty }) => {
+const Leaderboard = ({ operation, difficulty, duration }) => {
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -11,7 +11,7 @@ const Leaderboard = ({ operation, difficulty }) => {
       try {
         setLoading(true);
         setError('');
-        const data = await getLeaderboard(operation, difficulty);
+        const data = await getLeaderboard(operation, difficulty, duration);
         setScores(data);
       } catch (err) {
         console.error('Leaderboard error:', err);
@@ -22,7 +22,7 @@ const Leaderboard = ({ operation, difficulty }) => {
     };
 
     fetchScores();
-  }, [operation, difficulty]);
+  }, [operation, difficulty, duration]);
 
   const getOperationDisplay = () => {
     const symbols = { '+': '+', '-': '−', '×': '×', '÷': '÷' };
