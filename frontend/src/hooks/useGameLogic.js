@@ -3,6 +3,8 @@ import { generateAdditionProblem, generateBasicProblem, calculateAnswer, getProb
 
 export const useGameLogic = (operation, difficulty) => {
   const [score, setScore] = useState(0)
+  const [correctCount, setCorrectCount] = useState(0)
+  const [wrongCount, setWrongCount] = useState(0)
   const [isGameActive, setIsGameActive] = useState(false)
   const [showGetReady, setShowGetReady] = useState(true)
   const [problemIndex, setProblemIndex] = useState(0)
@@ -32,6 +34,8 @@ export const useGameLogic = (operation, difficulty) => {
     setIsGameActive(true)
     setShowGetReady(false)
     setScore(0)
+    setCorrectCount(0)
+    setWrongCount(0)
     generateNewProblem()
   }
 
@@ -44,16 +48,32 @@ export const useGameLogic = (operation, difficulty) => {
     setIsGameActive(false)
     setShowGetReady(true)
     setScore(0)
+    setCorrectCount(0)
+    setWrongCount(0)
     generateNewProblem()
   }
 
-  const incrementScore = () => {
+  const handleCorrectAnswer = () => {
     setScore(prev => prev + 1)
+    setCorrectCount(prev => prev + 1)
+    generateNewProblem() // Move to next problem on correct answer
   }
+
+  const handleWrongAnswer = () => {
+    setWrongCount(prev => prev + 1)
+    // Notice: We intentionally do NOT call generateNewProblem() here
+  }
+
+  // Calculate dynamic accuracy percentage
+  const totalAttempts = correctCount + wrongCount
+  const accuracy = totalAttempts > 0 ? Math.round((correctCount / totalAttempts) * 100) : 100
 
   return {
     addends,
     score,
+    correctCount,
+    wrongCount,
+    accuracy,
     isGameActive,
     showGetReady,
     correctAnswer,
@@ -61,7 +81,8 @@ export const useGameLogic = (operation, difficulty) => {
     startGame,
     endGame,
     resetGame,
-    incrementScore,
+    handleCorrectAnswer,
+    handleWrongAnswer,
     generateNewProblem
   }
 }

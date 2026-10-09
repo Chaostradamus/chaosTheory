@@ -39,25 +39,27 @@ function App() {
   const {
     addends,
     score,
+    correctCount,
+    wrongCount,
+    accuracy,
     showGetReady,
     correctAnswer,
     startGame: startGameLogic,
     resetGame: resetGameLogic,
-    incrementScore,
-    generateNewProblem,
+    handleCorrectAnswer,
+    handleWrongAnswer,
   } = useGameLogic(operation, difficulty)
 
   // --- Helper Functions ---
 
-  const checkAndSaveScore = async (finalScore) => {
+  const checkAndSaveScore = async (finalScore, finalCorrect, finalWrong, finalAccuracy) => {
     try {
-      // Replaced hardcoded fetch with API service method
       const leaderboard = await getLeaderboard(operation, difficulty, gameDuration)
       
       if (leaderboard.length < 10 || finalScore > (leaderboard[leaderboard.length - 1]?.score || 0)) {
         if (token) {
-          await saveScore(operation, difficulty, finalScore, gameDuration, token)
-          setFeedback(`✅ Score saved! You're in the top 10!`)
+          await saveScore(operation, difficulty, finalScore, gameDuration, finalCorrect, finalWrong, finalAccuracy, token)
+          setFeedback(`✅ Score saved! You're in the top 10! (Accuracy: ${finalAccuracy}%)`)
         } else {
           setShowSavePrompt(true)
         }
@@ -70,9 +72,9 @@ function App() {
   const handleTimerComplete = () => {
     setIsGameActive(false)
     const finalScore = score
-    setFeedback(`⏰ Time's up! Final score: ${finalScore}`)
+    setFeedback(`⏰ Time's up! Final score: ${finalScore} | Accuracy: ${accuracy}%`)
     setUserAnswer('')  // Clear input
-    checkAndSaveScore(finalScore)
+    checkAndSaveScore(finalScore, correctCount, wrongCount, accuracy)
   }
 
   // --- Timer ---
@@ -102,7 +104,7 @@ function App() {
       return
     }
     try {
-      await saveGuestScore(operation, difficulty, score, gameDuration, guestName.trim())
+      await saveGuestScore(operation, difficulty, score, gameDuration, correctCount, wrongCount, accuracy, guestName.trim())
       setShowSavePrompt(false)
       setGuestName('')
       setFeedback(`✅ Score saved as "${guestName.trim()}"! You're in the top 10!`)
@@ -175,12 +177,12 @@ function App() {
       : parsedAnswer === correctAnswer
     
     if (isCorrect) {
-      incrementScore()
+      handleCorrectAnswer()
       setFeedback('✅ Correct!')
-      generateNewProblem()
       setUserAnswer('')
     } else {
-      setFeedback(`❌ Wrong. The correct answer was ${correctAnswer}`)
+      handleWrongAnswer()
+      setFeedback('❌ Incorrect. Try again!')
       setUserAnswer('')
     }
   }
@@ -272,7 +274,14 @@ function App() {
             </>
           )}
           
-          <ScoreTimer score={score} timeLeft={timeLeft} isGameActive={isGameActive} />
+          <ScoreTimer 
+            score={score} 
+            accuracy={accuracy} 
+            correctCount={correctCount} 
+            wrongCount={wrongCount} 
+            timeLeft={timeLeft} 
+            isGameActive={isGameActive} 
+          />
           
           <MathProblem 
             addends={addends}
