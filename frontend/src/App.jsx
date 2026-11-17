@@ -8,6 +8,7 @@ import GameControls from './components/GameControls'
 import FeedbackMessage from './components/FeedbackMessage'
 import AuthModal from './components/AuthModal'
 import Leaderboard from './components/Leaderboard'
+import UserProfile from './components/UserProfile'
 import { useGameLogic } from './hooks/useGameLogic'
 import { useTimer } from './hooks/useTimer'
 import { getAuthToken, saveScore, saveGuestScore, removeAuthToken, getLeaderboard } from './services/api'
@@ -27,6 +28,7 @@ function App() {
   const [isTokenLoaded, setIsTokenLoaded] = useState(false)
 
   // Game state
+  const [showProfile, setShowProfile] = useState(false)
   const [operation, setOperation] = useState('+')
   const [difficulty, setDifficulty] = useState(1)
   const [gameDuration, setGameDuration] = useState(60)
@@ -55,17 +57,34 @@ function App() {
   const checkAndSaveScore = async (finalScore, finalCorrect, finalWrong, finalAccuracy) => {
     try {
       const leaderboard = await getLeaderboard(operation, difficulty, gameDuration)
-      
-      if (leaderboard.length < 10 || finalScore > (leaderboard[leaderboard.length - 1]?.score || 0)) {
-        if (token) {
-          await saveScore(operation, difficulty, finalScore, gameDuration, finalCorrect, finalWrong, finalAccuracy, token)
+      const isTopTen =
+        leaderboard.length < 10 ||
+        finalScore > (leaderboard[leaderboard.length - 1]?.score || 0)
+
+      if (token) {
+        // Always save logged-in user games so every round counts toward profile stats
+        await saveScore(
+          operation,
+          difficulty,
+          finalScore,
+          gameDuration,
+          finalCorrect,
+          finalWrong,
+          finalAccuracy,
+          token
+        )
+
+        if (isTopTen) {
           setFeedback(`✅ Score saved! You're in the top 10! (Accuracy: ${finalAccuracy}%)`)
         } else {
-          setShowSavePrompt(true)
+          setFeedback(`✅ Score saved to your profile! (Accuracy: ${finalAccuracy}%)`)
         }
+      } else if (isTopTen) {
+        // Only prompt guests to enter a name if they made the Top 10
+        setShowSavePrompt(true)
       }
     } catch (error) {
-      console.error('Error checking leaderboard:', error)
+      console.error('Error saving or checking score:', error)
     }
   }
 
@@ -123,6 +142,7 @@ function App() {
     setUser(null)
     setToken(null)
     setIsTokenLoaded(false)
+    setShowProfile(false)
   }
 
   const handleOperationChange = (newOperation) => {
@@ -203,6 +223,19 @@ function App() {
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ fontWeight: 'bold' }}>👤 {user.username}</span>
+              <button
+                onClick={() => setShowProfile(true)}
+                style={{
+                  padding: '6px 14px',
+                  backgroundColor: '#2196F3',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                Profile
+              </button>
               <button 
                 onClick={handleLogout}
                 style={{
@@ -318,6 +351,10 @@ function App() {
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
       />
+
+      {showProfile && (
+        <UserProfile onClose={() => setShowProfile(false)} />
+      )}
 
       {showSavePrompt && (
         <div style={{

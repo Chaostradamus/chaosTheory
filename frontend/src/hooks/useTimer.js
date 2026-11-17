@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react'
 export const useTimer = (initialTime = 60, onTick, onComplete) => {
   const [timeLeft, setTimeLeft] = useState(initialTime)
   const timerRef = useRef(null)
+  const isRunningRef = useRef(false)
   const onCompleteRef = useRef(onComplete)
   const onTickRef = useRef(onTick)
 
@@ -12,26 +13,37 @@ export const useTimer = (initialTime = 60, onTick, onComplete) => {
     onTickRef.current = onTick
   }, [onComplete, onTick])
 
+  // Handle tick and completion side effects cleanly outside state updaters
+  useEffect(() => {
+    if (!isRunningRef.current) return
+
+    if (onTickRef.current) {
+      onTickRef.current(timeLeft)
+    }
+
+    if (timeLeft <= 0) {
+      isRunningRef.current = false
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+      if (onCompleteRef.current) {
+        onCompleteRef.current()
+      }
+    }
+  }, [timeLeft])
+
   const startTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current)
-    
+    isRunningRef.current = true
+
     timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        const newTime = prev - 1
-        if (onTickRef.current) onTickRef.current(newTime)
-        
-        if (newTime <= 0) {
-          clearInterval(timerRef.current)
-          timerRef.current = null
-          if (onCompleteRef.current) onCompleteRef.current()
-          return 0
-        }
-        return newTime
-      })
+      setTimeLeft(prev => (prev <= 1 ? 0 : prev - 1))
     }, 1000)
   }
 
   const stopTimer = () => {
+    isRunningRef.current = false
     if (timerRef.current) {
       clearInterval(timerRef.current)
       timerRef.current = null

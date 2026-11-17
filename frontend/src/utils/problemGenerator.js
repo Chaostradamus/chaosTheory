@@ -140,32 +140,32 @@ export const generateSubtractionProblem = (difficulty) => {
 };
 
 // Generates multiplication problems based on difficulty (Levels 1-3)
+// Generates multiplication problems based on difficulty (Levels 1-3)
 export const generateMultiplicationProblem = (difficulty) => {
   switch (difficulty) {
     case 1: {
-      // Level 1: Single digit x Single digit (0 to 12)
-      const num1 = Math.floor(Math.random() * 13);
-      const num2 = Math.floor(Math.random() * 13);
-      return [num1, num2];
+      // Level 1: Times tables 1–6, capped at x10 (1–6 x 1–10)
+      const tableNum = Math.floor(Math.random() * 6) + 1; // 1 to 6
+      const multiplier = Math.floor(Math.random() * 10) + 1; // 1 to 10
+      return Math.random() < 0.5 ? [tableNum, multiplier] : [multiplier, tableNum];
     }
     case 2: {
-      // Level 2: Single digit x Double digit
-      const singleDigit = Math.floor(Math.random() * 8) + 2; // 2-9
-      const doubleDigit = Math.floor(Math.random() * 90) + 10; // 10-99
-      return Math.random() < 0.5 ? [singleDigit, doubleDigit] : [doubleDigit, singleDigit];
+      // Level 2: Times tables 7–12 (7–12 x 1–12)
+      const tableNum = Math.floor(Math.random() * 6) + 7; // 7 to 12
+      const multiplier = Math.floor(Math.random() * 12) + 1; // 1 to 12
+      return Math.random() < 0.5 ? [tableNum, multiplier] : [multiplier, tableNum];
     }
     case 3: {
-      // Level 3: Double digit x Double digit
-      const num1 = Math.floor(Math.random() * 90) + 10;
-      const num2 = Math.floor(Math.random() * 90) + 10;
+      // Level 3: Times tables 1–12 (1–12 x 1–12)
+      const num1 = Math.floor(Math.random() * 12) + 1; // 1 to 12
+      const num2 = Math.floor(Math.random() * 12) + 1; // 1 to 12
       return [num1, num2];
     }
     default: {
-      return [Math.floor(Math.random() * 13), Math.floor(Math.random() * 13)];
+      return [Math.floor(Math.random() * 12) + 1, Math.floor(Math.random() * 12) + 1];
     }
   }
 };
-
 // Generates division problems based on difficulty (Levels 1-3)
 export const generateDivisionProblem = (difficulty) => {
   switch (difficulty) {
@@ -277,9 +277,9 @@ export const getDifficultyBlurb = (operation, difficulty) => {
 
   if (operation === '×') {
     switch (difficulty) {
-      case 1: return '📘 Level 1: Single digit × single digit (0–12 times tables)';
-      case 2: return '📙 Level 2: Single digit × double digit';
-      case 3: return '📗 Level 3: Double digit × double digit';
+      case 1: return '📘 Level 1: Times tables 1–6 (up to × 10)';
+      case 2: return '📙 Level 2: Times tables 7–12 (up to × 12)';
+      case 3: return '📗 Level 3: Mixed times tables 1–12';
       default: return '';
     }
   }
